@@ -6,7 +6,7 @@
 ## Registro de tiempo
 | Semana | Tiempo aproximado |
 |---|---|
-| W01 | 3 horas |
+| W01 | 5 horas |
 
 ## Qué hice en W01
 - Configuré el entorno portable en USB (Python, pip, virtualenv y Git).
@@ -20,4 +20,4 @@
 - Un test falló porque faltaba correr collectstatic.
 
 ## Qué aprendí
-(Escríbelo con tus propias palabras.)
+(bueno ps aprendi a programar un poco pq l vdd estaba perdido.)
