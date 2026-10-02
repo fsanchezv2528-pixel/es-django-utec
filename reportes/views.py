@@ -1,3 +1,10 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def index(request):
+    context = {
+        'titulo': 'Reportes',
+        'descripcion': 'Dashboard, KPIs y exportación de datos.',
+        'espiral': 'Espiral 7 · W19',
+    }
+    return render(request, 'reportes/index.html', context)
