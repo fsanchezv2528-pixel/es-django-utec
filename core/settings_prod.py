@@ -4,7 +4,7 @@
 Hereda settings.py y sobreescribe lo necesario para producción.
 
 Variables de entorno requeridas en Render:
-    SECRET_KEY              -> clave aleatoria (Render la genera)
+    SECRET_KEY              -> clave aleatoria
     DATABASE_URL            -> la entrega Render PostgreSQL
     DJANGO_SETTINGS_MODULE  -> core.settings_prod
     ALLOWED_HOSTS           -> opcional (Render inyecta RENDER_EXTERNAL_HOSTNAME)
@@ -52,14 +52,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = 'same-origin'
 
 # ── ARCHIVOS ESTÁTICOS (WhiteNoise) ────────────────────────────────
-STORAGES = {
-    'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
-    },
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    },
-}
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── LOGGING: solo WARNING y superiores ─────────────────────────────
 LOGGING = {
