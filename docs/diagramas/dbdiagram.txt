@@ -1,0 +1,72 @@
+// ERP Django — Diagrama ER
+// dbdiagram.io syntax
+
+Table Categoria {
+  id bigint [pk, increment]
+  nombre varchar(100) [not null, unique]
+  descripcion text
+}
+
+Table Proveedor {
+  id bigint [pk, increment]
+  nombre varchar(150) [not null]
+  contacto varchar(100)
+  correo varchar(254) [not null, unique]
+  telefono varchar(20)
+  activo bool [default: true]
+  creado datetime [default: `now()`]
+}
+
+Table Cliente {
+  id bigint [pk, increment]
+  nombre varchar(150) [not null]
+  correo varchar(254) [not null, unique]
+  telefono varchar(20)
+  activo bool [default: true]
+  creado datetime [default: `now()`]
+}
+
+Table Producto {
+  id bigint [pk, increment]
+  nombre varchar(200) [not null]
+  precio decimal(10,2) [not null, note: 'MinValue: 0']
+  stock int [default: 0, note: 'MinValue: 0']
+  categoria_id bigint [ref: > Categoria.id, not null]
+  proveedor_id bigint [ref: > Proveedor.id, null]
+  activo bool [default: true]
+  creado datetime [default: `now()`]
+}
+
+Table Venta {
+  id bigint [pk, increment]
+  cliente_id bigint [ref: > Cliente.id, not null]
+  fecha datetime [default: `now()`]
+  // total: propiedad calculada — NO es campo de BD
+}
+
+Table DetalleVenta {
+  id bigint [pk, increment]
+  venta_id bigint [ref: > Venta.id, not null]
+  producto_id bigint [ref: > Producto.id, not null]
+  cantidad int [not null, note: 'PositiveInteger, >= 1']
+  precio_unitario decimal(10,2) [not null, note: 'Precio al momento de la venta']
+}
+
+Table Pedido {
+  id bigint [pk, increment]
+  numero_pedido varchar(20) [unique, note: 'PED-YYYY-NNNN']
+  cliente_id bigint [ref: > Cliente.id, not null]
+  estado varchar(20) [note: 'pendiente|pagado|enviado|cancelado']
+  fecha_pedido datetime [default: `now()`]
+  fecha_entrega date [null]
+  total_pagado decimal(10,2) [null]
+}
+
+Table ConfiguracionERP {
+  id bigint [pk, note: 'Siempre pk=1 (singleton)']
+  nombre_empresa varchar(200) [not null]
+  rfc varchar(13)
+  moneda varchar(3) [default: 'MXN']
+  iva_porcentaje decimal(5,2) [default: 16.00]
+  logo varchar [null, note: 'ImageField — ruta al archivo']
+}
