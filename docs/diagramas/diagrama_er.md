@@ -104,5 +104,5 @@ erDiagram
 
 | Rol | Nombre | Fecha | Observaciones |
 |---|---|---|---|
-| Desarrollador | [Nombre] | | |
+| Desarrollador | [Felipe Sánchez Vázquez] | | |
 | Asesor (PO) | MC. Román Fernando López González | | |
