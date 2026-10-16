@@ -67,3 +67,24 @@ panel admin funcional y una suite de ≥ 15 pruebas de modelo pasando.
 | Agregar validators a campos críticos | ⏳ W06 |
 | Suite completa ≥ 15 tests | ⏳ W06 |
 | Instalar y configurar django-jazzmin | ⏳ W06
+
+## Sprint 1 — Estado final W06
+
+| Tarea | Estado |
+|---|---|
+| Diseño ER | ✅ W04 |
+| Aprobación del asesor | ⏳ pendiente (revisión final del profesor) |
+| Implementar models.py × 6 apps | ✅ W05 |
+| makemigrations 0001_initial + migrate | ✅ W05 |
+| Registrar admin.py | ✅ W05 |
+| clean() en Producto, DetalleVenta, Pedido | ✅ W06 |
+| Migración 0002_validators_pedido | ✅ W06 |
+| Instalar y configurar django-jazzmin | ✅ W06 |
+| Suite 15+ tests de modelo | ✅ W06 (17 tests) |
+
+## Hito M2 — ALCANZADO técnicamente ✅ (falta firma del asesor)
+- showmigrations: [X] en 5 apps (0001 + 0002 en ventas)
+- Tests: Ran 72 tests → OK
+- Admin: 8 modelos con Jazzmin
+- URL producción: https://es-django-utec.onrender.com/admin/
+- Fecha: 16/10/2026

@@ -1,9 +1,9 @@
 # Sprint 1 Retrospective — ERP Django
 ## Semanas W04–W06 · Espiral 2: Modelado de Datos y ORM
 
-**Fecha:** ___/___/_____
+**Fecha:** 16/10/2026
 
-> Borrador: revísalo y cámbialo con tu experiencia real antes de entregarlo.
+> Borrador: tuve dificultades en el .txt
 
 ## ¿Qué funcionó bien? (Keep)
 1. Diseñar el diagrama ER y documentar las decisiones antes de escribir código evitó rehacer modelos en W05.
