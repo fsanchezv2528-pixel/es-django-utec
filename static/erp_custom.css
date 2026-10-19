@@ -1,15 +1,85 @@
-/* Utilidades adicionales de Fable 5 AzulERP.
-   Las variables CSS principales están definidas en base.html. */
+/* Personalización de Fable 5 AzulERP.
+   Los colores base (tokens) viven en base.html.
+   Este archivo añade el estilo del menú, tarjetas y el panel admin. */
 
+/* ── MENÚ SUPERIOR ────────────────────────────────────────────────────── */
+.erp-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+.erp-brand { color: var(--clr-amber) !important; }
+
+.erp-nav-link { position: relative; }
+.erp-nav-link::after {
+    content: "";
+    position: absolute;
+    left: .75rem;
+    right: .75rem;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--clr-amber);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .25s ease;
+}
+.erp-nav-link:hover,
+.erp-nav-link.active {
+    background: rgba(255, 255, 255, .08);
+    color: var(--clr-amber) !important;
+}
+.erp-nav-link:hover::after,
+.erp-nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* Botón Entrar / Salir como píldora dorada */
+.erp-nav-link.erp-nav-cta {
+    border: 1.5px solid var(--clr-amber);
+    border-radius: 999px;
+    padding: .3rem 1rem;
+    margin-left: .35rem;
+}
+.erp-nav-link.erp-nav-cta::after { display: none; }
+.erp-nav-link.erp-nav-cta:hover {
+    background: var(--clr-amber);
+    color: #0F2C5C !important;
+}
+
+/* ── TARJETAS DEL INICIO ──────────────────────────────────────────────── */
 .erp-module-card {
-    transition: transform .2s, box-shadow .2s;
+    border-top: 3px solid transparent;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
     cursor: pointer;
 }
 .erp-module-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-md);
+    border-top-color: var(--clr-amber);
 }
 
+/* Títulos legibles en modo oscuro */
+[data-theme="dark"] .erp-module-card { --clr-navy: #E6ECF5; }
+[data-theme="dark"] .erp-main h1,
+[data-theme="dark"] .erp-module-card h1,
+[data-theme="dark"] .erp-module-card h2,
+[data-theme="dark"] .erp-module-card h3,
+[data-theme="dark"] .erp-module-card h4,
+[data-theme="dark"] .erp-module-card h5,
+[data-theme="dark"] .erp-module-card h6,
+[data-theme="dark"] .erp-module-card strong,
+[data-theme="dark"] .text-navy {
+    color: #E6ECF5 !important;
+}
+
+/* Dorado más oscuro para texto sobre fondo crema (modo claro) */
+[data-theme="light"] .badge-erp-gold,
+[data-theme="light"] .erp-table tfoot td {
+    color: #8A6508;
+}
+
+/* ── UTILIDADES ───────────────────────────────────────────────────────── */
 .text-gold   { color: var(--clr-gold)  !important; }
 .text-navy   { color: var(--clr-navy)  !important; }
 .bg-navy     { background: var(--clr-navy) !important; }
@@ -20,30 +90,25 @@
     font-size: .9em;
 }
 
-/* ── JAZZMIN: Override de colores con Fable 5 AzulERP ─────────────────── */
+/* ── JAZZMIN (panel admin) ────────────────────────────────────────────── */
+/* El admin no usa los tokens de base.html, por eso los colores van fijos.
+   Azul #0F2C5C · Azul claro #1E5BB8 · Dorado #E0A82E · Dorado oscuro #C8961E */
 
-/* Sidebar color navy */
-.main-sidebar, .sidebar { background-color: #0A2342 !important; }
+.main-sidebar, .sidebar { background-color: #0F2C5C !important; }
+.main-header.navbar { background-color: #0F2C5C !important; }
 
-/* Navbar color navy */
-.main-header.navbar { background-color: #0A2342 !important; }
+.brand-link { border-bottom: 1px solid #C8961E !important; }
+.brand-text  { color: #E0A82E !important; font-weight: 700 !important; }
 
-/* Brand / logo area */
-.brand-link { border-bottom: 1px solid #B8860B !important; }
-.brand-text  { color: #D4AF37 !important; font-weight: 700 !important; }
-
-/* Sidebar links */
 .nav-sidebar .nav-link { color: rgba(255,255,255,.82) !important; }
 .nav-sidebar .nav-link:hover,
 .nav-sidebar .nav-link.active {
-    background-color: #1B4F8A !important;
+    background-color: #1E5BB8 !important;
     color: #FFFFFF !important;
 }
 
-/* Accent: botones y badges en dorado */
 .accent-navy .nav-sidebar .nav-link.active {
-    background-color: #B8860B !important;
+    background-color: #C8961E !important;
 }
 
-/* Footer */
-.main-footer { border-top: 2px solid #B8860B; }
+.main-footer { border-top: 2px solid #C8961E; }

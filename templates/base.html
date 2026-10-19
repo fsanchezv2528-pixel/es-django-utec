@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0A2342">
+    <meta name="theme-color" content="#0F2C5C">
     <title>{% block title %}ERP Django{% endblock %} · UTEC Celaya</title>
 
     <!-- Google Fonts: Playfair Display + Inter + JetBrains Mono -->
@@ -18,39 +19,39 @@
 
     <!-- Fable 5 AzulERP — Design System -->
     <style>
-        /* TOKENS MODO DÍA */
+        /* TOKENS MODO DÍA — azul profundo + dorado cálido */
         :root, [data-theme="light"] {
-            --clr-navy   : #0A2342;
-            --clr-royal  : #1B4F8A;
+            --clr-navy   : #0F2C5C;
+            --clr-royal  : #1E5BB8;
             --clr-sky    : #4A90D9;
             --clr-ice    : #E8F0FB;
-            --clr-gold   : #B8860B;
-            --clr-amber  : #D4A017;
+            --clr-gold   : #C99A1E;
+            --clr-amber  : #E0A82E;
             --clr-cream  : #FDF8E8;
-            --clr-bg     : #F5F7FA;
+            --clr-bg     : #F8E1E1;
             --clr-surface: #FFFFFF;
             --clr-text   : #1A1A2E;
             --clr-muted  : #5A6A7E;
             --clr-border : #C8D8EC;
             --clr-danger : #C0392B;
             --clr-ok     : #1A7A4A;
-            --shadow-sm  : 0 1px 4px rgba(10,35,66,.08);
-            --shadow-md  : 0 4px 16px rgba(10,35,66,.12);
+            --shadow-sm  : 0 1px 4px rgba(15,44,92,.08);
+            --shadow-md  : 0 4px 16px rgba(15,44,92,.12);
         }
         /* TOKENS MODO NOCHE */
         [data-theme="dark"] {
-            --clr-navy   : #1E3A5F;
+            --clr-navy   : #407ece;
             --clr-royal  : #2E5F9E;
             --clr-sky    : #6BAEE8;
             --clr-ice    : #1A2A3A;
-            --clr-gold   : #D4AF37;
-            --clr-amber  : #E8C547;
+            --clr-gold   : #E0B13A;
+            --clr-amber  : #EBBE4F;
             --clr-cream  : #2A2510;
-            --clr-bg     : #0D1B2A;
+            --clr-bg     : #2A0E14;
             --clr-surface: #142033;
             --clr-text   : #E2EAF4;
             --clr-muted  : #8AA0B8;
-            --clr-border : #2A3F58;
+            --clr-border : #264366;
             --clr-danger : #E74C3C;
             --clr-ok     : #2ECC71;
             --shadow-sm  : 0 1px 4px rgba(0,0,0,.3);
@@ -144,21 +145,21 @@
         }
         /* BOTONES */
         .btn-erp-primary {
-            background: var(--clr-navy); color: #FFF;
+            background: #FFFFFF; color: #0F2C5C;
             border: 2px solid var(--clr-gold); border-radius: 8px;
             padding: .45rem 1.2rem; font-weight: 600; font-size: .88rem;
             cursor: pointer; text-decoration: none; display: inline-block;
             transition: background .2s, color .2s;
         }
-        .btn-erp-primary:hover { background: var(--clr-gold); color: var(--clr-navy); }
+        .btn-erp-primary:hover { background: var(--clr-gold); color: #0F2C5C; }
         .btn-erp-gold {
-            background: var(--clr-gold); color: var(--clr-navy);
-            border: 2px solid var(--clr-navy); border-radius: 8px;
+            background: #FFFFFF; color: #0F2C5C;
+            border: 2px solid var(--clr-gold); border-radius: 8px;
             padding: .45rem 1.2rem; font-weight: 700;
             cursor: pointer; text-decoration: none; display: inline-block;
             transition: background .2s;
         }
-        .btn-erp-gold:hover { background: var(--clr-amber); }
+        .btn-erp-gold:hover { background: var(--clr-amber); color: #0F2C5C; }
         .btn-erp-danger {
             background: var(--clr-danger); color: #FFF; border: none;
             border-radius: 8px; padding: .4rem 1rem;
@@ -239,11 +240,14 @@
         }
         /* FOOTER */
         .erp-footer {
-            background: var(--clr-navy); color: rgba(255,255,255,.6);
+            background: var(--clr-navy); color: rgba(180, 30, 30, 0);
             text-align: center; font-size: .78rem;
             padding: .75rem; border-top: 2px solid var(--clr-gold);
         }
     </style>
+
+    <!-- Personalización (menú, tarjetas, admin) — va después del sistema de diseño -->
+    <link rel="stylesheet" href="{% static 'erp_custom.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -265,11 +269,11 @@
            class="erp-nav-link {% block nav_reportes %}{% endblock %}">Reportes</a>
         <a href="/admin/" class="erp-nav-link">Admin</a>
         {% if user.is_authenticated %}
-            <a href="/accounts/logout/" class="erp-nav-link">
+            <a href="/accounts/logout/" class="erp-nav-link erp-nav-cta">
                 Salir ({{ user.username }})
             </a>
         {% else %}
-            <a href="/accounts/login/" class="erp-nav-link">Entrar</a>
+            <a href="/accounts/login/" class="erp-nav-link erp-nav-cta">Entrar</a>
         {% endif %}
         <button class="theme-toggle" id="themeBtn" title="Modo claro/oscuro">🌙</button>
     </div>
@@ -298,7 +302,7 @@
 
 <!-- FOOTER -->
 <footer class="erp-footer">
-    ERP Django · Django 4.2 LTS · Fable 5 AzulERP · UTEC Celaya · Espiral 1
+    ERP Django · Django 4.2 LTS · Fable 5 AzulERP · UTEC Celaya · Espiral 3
 </footer>
 
 <!-- Bootstrap JS -->
