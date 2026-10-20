@@ -1,10 +1,21 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="light" data-event="halloween">
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0F2C5C">
+    <script>
+        /* Aplica el modo guardado antes de pintar la página (sin parpadeo) */
+        (function () {
+            try {
+                var t = localStorage.getItem('erpTheme');
+                if (t === 'dark' || t === 'light') {
+                    document.documentElement.setAttribute('data-theme', t);
+                }
+            } catch (e) {}
+        })();
+    </script>
     <title>{% block title %}ERP Django{% endblock %} · UTEC Celaya</title>
 
     <!-- Google Fonts: Playfair Display + Inter + JetBrains Mono -->
@@ -93,7 +104,7 @@
             transition: background .2s, color .2s;
         }
         .erp-nav-link:hover, .erp-nav-link.active {
-            background: var(--clr-royal); color: #FFF !important;
+            background: var(--clr-royal); color: var(--clr-amber) !important;
         }
         .theme-toggle {
             background: var(--clr-gold); color: var(--clr-navy);
@@ -145,7 +156,7 @@
         }
         /* BOTONES */
         .btn-erp-primary {
-            background: #FFFFFF; color: #0F2C5C;
+            background: #E28484; color: #0F2C5C;
             border: 2px solid var(--clr-gold); border-radius: 8px;
             padding: .45rem 1.2rem; font-weight: 600; font-size: .88rem;
             cursor: pointer; text-decoration: none; display: inline-block;
@@ -240,10 +251,11 @@
         }
         /* FOOTER */
         .erp-footer {
-            background: var(--clr-navy); color: rgba(180, 30, 30, 0);
+            background: var(--clr-navy); color: rgba(255,255,255,.8);
             text-align: center; font-size: .78rem;
             padding: .75rem; border-top: 2px solid var(--clr-gold);
         }
+        [data-theme="dark"] .erp-footer { background: #3A1219; }
     </style>
 
     <!-- Personalización (menú, tarjetas, admin) — va después del sistema de diseño -->
@@ -275,7 +287,8 @@
         {% else %}
             <a href="/accounts/login/" class="erp-nav-link erp-nav-cta">Entrar</a>
         {% endif %}
-        <button class="theme-toggle" id="themeBtn" title="Modo claro/oscuro">🌙</button>
+        <button class="theme-toggle" id="themeBtn" type="button"
+                title="Modo claro/oscuro" aria-label="Cambiar modo claro/oscuro">🌙</button>
     </div>
 </nav>
 
@@ -312,19 +325,20 @@
 <!-- Toggle modo noche -->
 <script>
 (function () {
-    var btn  = document.getElementById('themeBtn');
-    var html = document.documentElement;
+    var btn   = document.getElementById('themeBtn');
+    var html  = document.documentElement;
     var icons = { light: '🌙', dark: '☀️' };
-    var saved = localStorage.getItem('erpTheme') || 'light';
+    var saved = 'light';
+    try { saved = localStorage.getItem('erpTheme') || 'light'; } catch (e) {}
+    if (saved !== 'dark') { saved = 'light'; }
     html.setAttribute('data-theme', saved);
-    if (btn) btn.textContent = icons[saved];
     if (btn) {
+        btn.textContent = icons[saved];
         btn.addEventListener('click', function () {
-            var current = html.getAttribute('data-theme');
-            var next    = current === 'light' ? 'dark' : 'light';
+            var next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             html.setAttribute('data-theme', next);
             btn.textContent = icons[next];
-            localStorage.setItem('erpTheme', next);
+            try { localStorage.setItem('erpTheme', next); } catch (e) {}
         });
     }
 })();

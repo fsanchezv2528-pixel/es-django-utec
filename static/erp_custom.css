@@ -1,6 +1,8 @@
 /* Personalización de Fable 5 AzulERP.
    Los colores base (tokens) viven en base.html.
    Este archivo añade el estilo del menú, tarjetas y el panel admin. */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
 
 /* ── MENÚ SUPERIOR ────────────────────────────────────────────────────── */
 .erp-navbar {
@@ -112,3 +114,198 @@
 }
 
 .main-footer { border-top: 2px solid #C8961E; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   🎃 HALLOWEEN — se activa con <html data-event="halloween">
+   Para apagarlo: quita ese atributo de la etiqueta <html> en base.html.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Paleta: noche embrujada (modo oscuro) */
+html[data-event="halloween"][data-theme="dark"] {
+    --clr-navy   : #1A0B2E;
+    --clr-royal  : #6B2FA0;
+    --clr-sky    : #FF9E40;
+    --clr-ice    : #1F1033;
+    --clr-gold   : #FF7518;
+    --clr-amber  : #FFA53D;
+    --clr-cream  : #2A1608;
+    --clr-bg     : #0E0714;
+    --clr-surface: #1A0F2B;
+    --clr-text   : #F3E9FF;
+    --clr-muted  : #B7A3D0;
+    --clr-border : #3B2459;
+    --clr-danger : #FF4D4D;
+    --clr-ok     : #5BE37D;
+    --shadow-sm  : 0 1px 6px rgba(0,0,0,.45);
+    --shadow-md  : 0 4px 20px rgba(255,117,24,.22);
+}
+/* Paleta: pergamino y calabaza (modo claro) */
+html[data-event="halloween"][data-theme="light"] {
+    --clr-navy   : #2B1245;
+    --clr-royal  : #7A3FB0;
+    --clr-sky    : #C85A00;
+    --clr-ice    : #FFF0DC;
+    --clr-gold   : #E8650A;
+    --clr-amber  : #FF8C1A;
+    --clr-cream  : #FFF3E0;
+    --clr-bg     : #FFE6CC;
+    --clr-surface: #FFF9F2;
+    --clr-text   : #2A1238;
+    --clr-muted  : #6B5380;
+    --clr-border : #E5C9A8;
+    --clr-danger : #B3261E;
+    --clr-ok     : #1A7A4A;
+    --shadow-sm  : 0 1px 4px rgba(43,18,69,.12);
+    --shadow-md  : 0 4px 16px rgba(232,101,10,.22);
+}
+
+::selection { background: #FF7518; color: #1A0B2E; }
+
+/* Menú superior */
+html[data-event="halloween"] .erp-navbar {
+    background: linear-gradient(90deg, #12061F 0%, #2B1245 60%, #3A1458 100%);
+    border-bottom: 3px solid #FF7518;
+    box-shadow: 0 4px 22px rgba(255,117,24,.35);
+}
+html[data-event="halloween"] .erp-brand {
+    font-family: 'Creepster', 'Playfair Display', cursive;
+    font-size: 1.7rem;
+    font-weight: 400;
+    letter-spacing: .06em;
+    color: #FF9E40 !important;
+    text-shadow: 0 0 10px rgba(255,117,24,.8);
+    animation: hw-flicker 4s infinite;
+}
+html[data-event="halloween"] .erp-brand::after { content: " 🎃"; }
+
+/* Títulos */
+html[data-event="halloween"] .erp-page-title h2 {
+    font-family: 'Creepster', 'Playfair Display', cursive;
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: .05em;
+}
+html[data-event="halloween"] .erp-main h1 {
+    font-family: 'Creepster', 'Playfair Display', cursive;
+    font-weight: 400;
+    letter-spacing: .06em;
+}
+html[data-event="halloween"][data-theme="dark"] .erp-main h1 {
+    color: #FF9E40 !important;
+    text-shadow: 0 0 14px rgba(255,117,24,.6);
+}
+html[data-event="halloween"][data-theme="light"] .erp-main h1 {
+    color: #4B1D78 !important;
+}
+
+/* Tarjetas */
+html[data-event="halloween"] .erp-card:hover,
+html[data-event="halloween"] .erp-module-card:hover {
+    box-shadow: 0 0 20px rgba(255,117,24,.4);
+    border-top-color: #FF7518;
+}
+html[data-event="halloween"] .erp-card-header {
+    background: linear-gradient(90deg, #2B1245, #4B1D78);
+    border-left-color: #FF7518;
+}
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h1,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h2,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h3,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h4,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h5,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card h6,
+html[data-event="halloween"][data-theme="dark"] .erp-module-card strong {
+    color: #FFA53D !important;
+}
+html[data-event="halloween"][data-theme="light"] .erp-module-card h1,
+html[data-event="halloween"][data-theme="light"] .erp-module-card h2,
+html[data-event="halloween"][data-theme="light"] .erp-module-card h3,
+html[data-event="halloween"][data-theme="light"] .erp-module-card h4,
+html[data-event="halloween"][data-theme="light"] .erp-module-card h5,
+html[data-event="halloween"][data-theme="light"] .erp-module-card h6,
+html[data-event="halloween"][data-theme="light"] .erp-module-card strong {
+    color: #4B1D78 !important;
+}
+
+/* Badges y totales */
+html[data-event="halloween"][data-theme="light"] .badge-erp-gold,
+html[data-event="halloween"][data-theme="light"] .erp-table tfoot td {
+    color: #9A3E00;
+}
+
+/* Botones: calabaza */
+html[data-event="halloween"] .btn-erp-primary,
+html[data-event="halloween"] .btn-erp-gold {
+    background: linear-gradient(180deg, #FF8C1A, #FF7518);
+    color: #1A0B2E;
+    border: 2px solid #FFB366;
+    box-shadow: 0 0 12px rgba(255,117,24,.45);
+}
+html[data-event="halloween"] .btn-erp-primary:hover,
+html[data-event="halloween"] .btn-erp-gold:hover {
+    background: #6B2FA0;
+    color: #FFFFFF;
+    border-color: #FF9E40;
+}
+
+/* Pie de página */
+html[data-event="halloween"] .erp-footer {
+    background: #12061F;
+    color: rgba(255,255,255,.65);
+    border-top: 2px solid #FF7518;
+}
+html[data-event="halloween"] .erp-footer::after {
+    content: " · 🎃 Feliz Halloween 👻";
+}
+
+/* Telarañas en las esquinas del contenido */
+html[data-event="halloween"] .erp-main { position: relative; }
+html[data-event="halloween"] .erp-main .container { position: relative; z-index: 2; }
+html[data-event="halloween"] .erp-main::before,
+html[data-event="halloween"] .erp-main::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 170px;
+    height: 170px;
+    pointer-events: none;
+    z-index: 1;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Cpath d='M0 0L100 100M0 0L100 50M0 0L50 100M0 0L100 14M0 0L14 100'/%3E%3Cpath d='M0 25Q25 25 25 0M0 50Q50 50 50 0M0 75Q75 75 75 0M0 100Q100 100 100 0'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / contain;
+    opacity: .22;
+}
+html[data-event="halloween"] .erp-main::before { left: 0; }
+html[data-event="halloween"] .erp-main::after  { right: 0; transform: scaleX(-1); }
+html[data-event="halloween"][data-theme="light"] .erp-main::before,
+html[data-event="halloween"][data-theme="light"] .erp-main::after {
+    filter: invert(1);
+    opacity: .16;
+}
+
+/* Murciélago que cruza la pantalla */
+html[data-event="halloween"] body::after {
+    content: "🦇";
+    position: fixed;
+    top: 110px;
+    left: -60px;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 5;
+    animation: hw-bat 20s linear infinite;
+}
+
+@keyframes hw-bat {
+    0%   { transform: translate(0, 0) rotate(-6deg); }
+    25%  { transform: translate(28vw, 40px) rotate(6deg); }
+    50%  { transform: translate(55vw, -10px) rotate(-6deg); }
+    75%  { transform: translate(80vw, 50px) rotate(6deg); }
+    100% { transform: translate(112vw, 0) rotate(-6deg); }
+}
+@keyframes hw-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+    20%, 24%, 55% { opacity: .72; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-event="halloween"] body::after,
+    html[data-event="halloween"] .erp-brand { animation: none; }
+}
