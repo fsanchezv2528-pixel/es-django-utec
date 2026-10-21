@@ -1,14 +1,19 @@
 # clientes/views.py
-"""Vistas de la app clientes — W07.
+"""Vistas de la app clientes — W07 (lectura) + W08 (escritura)."""
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import ProtectedError
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView, UpdateView
+)
 
-Lectura: ListView y DetailView.
-Escritura (Create/Update/Delete): W08.
-"""
-from django.views.generic import DetailView, ListView
-
+from .forms import ClienteForm
 from .models import Cliente
 
 
+# ── Lectura (W07) ────────────────────────────────────────────────────
 class ClienteListView(ListView):
     """Lista paginada de clientes activos."""
 
@@ -22,7 +27,7 @@ class ClienteListView(ListView):
 
 
 class ClienteDetailView(DetailView):
-    """Detalle de un cliente con su historial de ventas."""
+    """Detalle de un cliente con sus últimas ventas."""
 
     model               = Cliente
     template_name       = 'clientes/detalle.html'
@@ -30,10 +35,64 @@ class ClienteDetailView(DetailView):
     pk_url_kwarg        = 'cliente_id'
 
     def get_context_data(self, **kwargs):
-        """Agrega las ventas del cliente al contexto."""
         ctx = super().get_context_data(**kwargs)
-        ctx['ventas'] = (
-            self.object.ventas
-            .order_by('-fecha')[:10]   # últimas 10 ventas
-        )
+        ctx['ventas'] = self.object.ventas.order_by('-fecha')[:10]
         return ctx
+
+
+# ── Escritura (W08) ──────────────────────────────────────────────────
+class ClienteCreateView(LoginRequiredMixin, CreateView):
+    """Alta de cliente."""
+
+    model         = Cliente
+    form_class    = ClienteForm
+    template_name = 'clientes/crear.html'
+    success_url   = reverse_lazy('clientes:lista')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f'Cliente "{self.object.nombre}" creado exitosamente.'
+        )
+        return response
+
+
+class ClienteUpdateView(LoginRequiredMixin, UpdateView):
+    """Edición de cliente."""
+
+    model         = Cliente
+    form_class    = ClienteForm
+    template_name = 'clientes/editar.html'
+    pk_url_kwarg  = 'cliente_id'
+    success_url   = reverse_lazy('clientes:lista')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request, f'Cliente "{self.object.nombre}" actualizado.'
+        )
+        return response
+
+
+class ClienteDeleteView(LoginRequiredMixin, DeleteView):
+    """Confirmación y borrado de cliente."""
+
+    model         = Cliente
+    template_name = 'clientes/eliminar.html'
+    pk_url_kwarg  = 'cliente_id'
+    success_url   = reverse_lazy('clientes:lista')
+
+    def form_valid(self, form):
+        nombre = self.object.nombre
+        try:
+            response = super().form_valid(form)
+        except ProtectedError:
+            messages.error(
+                self.request,
+                f'No se puede eliminar "{nombre}": tiene ventas. '
+                f'Desactívalo en su lugar.'
+            )
+            return redirect('clientes:detalle', cliente_id=self.object.pk)
+        messages.success(self.request, f'Cliente "{nombre}" eliminado.')
+        return response
