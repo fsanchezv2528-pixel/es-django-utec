@@ -309,3 +309,14 @@ html[data-event="halloween"] body::after {
     html[data-event="halloween"] body::after,
     html[data-event="halloween"] .erp-brand { animation: none; }
 }
+
+/* ── Halloween: títulos de las tarjetas del inicio legibles ───────────── */
+/* Los títulos usan --clr-royal (morado oscuro en Halloween). Dentro de cada
+   tarjeta lo cambiamos a naranja claro; no afecta al resto de la página. */
+html[data-event="halloween"][data-theme="dark"] .erp-module-card {
+    --clr-royal: #FFA53D;
+    --clr-sky:   #FFA53D;
+}
+html[data-event="halloween"][data-theme="light"] .erp-module-card {
+    --clr-royal: #4B1D78;
+}
