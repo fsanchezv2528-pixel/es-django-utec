@@ -1,8 +1,8 @@
 # ventas/views.py
-"""Vistas de la app ventas — W07 (lectura) + W08 (escritura)."""
-from django.conf import settings
+"""Vistas de la app ventas — W07 (lectura) + W08 (escritura) + W09 (permisos)."""
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView
@@ -40,16 +40,16 @@ class VentaDetailView(DetailView):
         )
 
 
-# ── Escritura (W08) ──────────────────────────────────────────────────
+# ── Escritura con permisos (W09) ─────────────────────────────────────
+@login_required
+@permission_required('ventas.add_venta', raise_exception=True)
 def crear_venta(request):
     """Crea una venta con una línea de detalle (2 formularios).
 
-    GET  → formularios vacíos.
-    POST → valida ambos; guarda si son correctos.
+    Los decoradores se revisan de arriba hacia abajo:
+        @login_required       → sin sesión: redirige a /accounts/login/
+        @permission_required  → con sesión sin 'add_venta': HTTP 403
     """
-    if not request.user.is_authenticated:
-        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
-
     venta_form   = VentaForm(request.POST or None)
     detalle_form = DetalleVentaForm(request.POST or None)
 
@@ -71,13 +71,14 @@ def crear_venta(request):
     })
 
 
-class VentaDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de venta (detalles en CASCADE)."""
+class VentaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Borrado de venta (detalles en CASCADE). Sin permiso → 403."""
 
-    model         = Venta
-    template_name = 'ventas/eliminar.html'
-    pk_url_kwarg  = 'venta_id'
-    success_url   = reverse_lazy('ventas:lista')
+    model               = Venta
+    template_name       = 'ventas/eliminar.html'
+    pk_url_kwarg        = 'venta_id'
+    success_url         = reverse_lazy('ventas:lista')
+    permission_required = 'ventas.delete_venta'
 
     def form_valid(self, form):
         pk       = self.object.pk

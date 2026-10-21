@@ -1,7 +1,7 @@
 # productos/views.py
-"""Vistas de la app productos — W07 (lectura) + W08 (escritura)."""
+"""Vistas de la app productos — W07 (lectura) + W08 (escritura) + W09 (permisos)."""
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -78,13 +78,23 @@ class ProductoUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class ProductoDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de producto (solo POST borra)."""
+# ── Borrado con permiso (W09) ────────────────────────────────────────
+class ProductoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Confirmación y borrado de producto.
 
-    model         = Producto
-    template_name = 'productos/eliminar.html'
-    pk_url_kwarg  = 'producto_id'
-    success_url   = reverse_lazy('productos:lista')
+    - Sin sesión            → redirige a /accounts/login/
+    - Con sesión sin permiso → HTTP 403 Forbidden
+
+    NOTA: no se usa raise_exception = True. Con True, Django devuelve 403
+    también a quien NO ha iniciado sesión, en vez de mandarlo al login.
+    El comportamiento por defecto ya da 403 al usuario autenticado.
+    """
+
+    model               = Producto
+    template_name       = 'productos/eliminar.html'
+    pk_url_kwarg        = 'producto_id'
+    success_url         = reverse_lazy('productos:lista')
+    permission_required = 'productos.delete_producto'
 
     def form_valid(self, form):
         nombre = self.object.nombre

@@ -1,13 +1,14 @@
 """Suite de pruebas W08 — Vistas de escritura: Create, Update, Delete.
 
+Actualizado en W09: los usuarios de prueba que borran productos o crean
+ventas ahora necesitan el permiso correspondiente (RBAC).
+
 Ejecutar con:
     python manage.py test tests.test_w08_escritura --verbosity=2
-
-Resultado esperado: Ran 13 tests ... OK
 """
 from decimal import Decimal
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -17,11 +18,18 @@ from proveedores.models import Proveedor
 from ventas.models      import Venta
 
 
+def _dar_permiso(user, app_label, codename):
+    user.user_permissions.add(
+        Permission.objects.get(content_type__app_label=app_label, codename=codename)
+    )
+
+
 class ProductoEscrituraTest(TestCase):
     """Tests de Create, Update y Delete de Producto."""
 
     def setUp(self):
         self.user = User.objects.create_user('testuser', password='testpass123')
+        _dar_permiso(self.user, 'productos', 'delete_producto')
         self.cat  = Categoria.objects.create(nombre='Cat Test')
         self.prod = Producto.objects.create(
             nombre='Laptop', precio=Decimal('10000.00'),
@@ -29,26 +37,22 @@ class ProductoEscrituraTest(TestCase):
         )
 
     def test_crear_sin_auth_redirige_a_login(self):
-        """GET /productos/nuevo/ sin login → 302 a /accounts/login/."""
         r = self.client.get(reverse('productos:crear'))
         self.assertEqual(r.status_code, 302)
         self.assertIn('/accounts/login/', r['Location'])
 
     def test_editar_sin_auth_redirige_a_login(self):
-        """GET /productos/<id>/editar/ sin login → 302."""
         r = self.client.get(reverse('productos:editar', args=[self.prod.pk]))
         self.assertEqual(r.status_code, 302)
         self.assertIn('/accounts/login/', r['Location'])
 
     def test_crear_con_auth_http_200(self):
-        """GET /productos/nuevo/ con login → 200."""
         self.client.force_login(self.user)
         r = self.client.get(reverse('productos:crear'))
         self.assertEqual(r.status_code, 200)
         self.assertTemplateUsed(r, 'productos/crear.html')
 
     def test_post_valido_crea_producto(self):
-        """POST válido crea el producto y redirige a la lista."""
         self.client.force_login(self.user)
         r = self.client.post(reverse('productos:crear'), {
             'nombre':    'Monitor 4K',
@@ -61,7 +65,6 @@ class ProductoEscrituraTest(TestCase):
         self.assertTrue(Producto.objects.filter(nombre='Monitor 4K').exists())
 
     def test_post_invalido_muestra_errores(self):
-        """POST con precio negativo → 200 con error en el campo precio."""
         self.client.force_login(self.user)
         r = self.client.post(reverse('productos:crear'), {
             'nombre':    'Producto mal',
@@ -74,7 +77,6 @@ class ProductoEscrituraTest(TestCase):
         self.assertFalse(Producto.objects.filter(nombre='Producto mal').exists())
 
     def test_delete_elimina_producto(self):
-        """POST /productos/<id>/eliminar/ → borra y redirige."""
         self.client.force_login(self.user)
         pk = self.prod.pk
         r  = self.client.post(reverse('productos:eliminar', args=[pk]))
@@ -93,7 +95,6 @@ class ClienteEscrituraTest(TestCase):
         self.assertEqual(r.status_code, 302)
 
     def test_post_valido_crea_cliente(self):
-        """POST válido crea el cliente y redirige."""
         self.client.force_login(self.user)
         r = self.client.post(reverse('clientes:crear'), {
             'nombre': 'María López',
@@ -104,7 +105,6 @@ class ClienteEscrituraTest(TestCase):
         self.assertTrue(Cliente.objects.filter(correo='maria@test.com').exists())
 
     def test_post_correo_duplicado_muestra_error(self):
-        """POST con correo repetido → 200 con error en el campo correo."""
         Cliente.objects.create(nombre='Ana', correo='dup@test.com')
         self.client.force_login(self.user)
         r = self.client.post(reverse('clientes:crear'), {
@@ -128,7 +128,6 @@ class ProveedorEscrituraTest(TestCase):
         self.assertEqual(r.status_code, 302)
 
     def test_delete_proveedor_con_auth(self):
-        """POST /proveedores/<id>/eliminar/ → borra y redirige."""
         self.client.force_login(self.user)
         pk = self.prov.pk
         r  = self.client.post(reverse('proveedores:eliminar', args=[pk]))
@@ -141,6 +140,7 @@ class VentaEscrituraTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user('userV', password='pass')
+        _dar_permiso(self.user, 'ventas', 'add_venta')
         cat       = Categoria.objects.create(nombre='Cat')
         self.prod = Producto.objects.create(
             nombre='P', precio=Decimal('100.00'), stock=5, categoria=cat
@@ -152,7 +152,6 @@ class VentaEscrituraTest(TestCase):
         self.assertEqual(r.status_code, 302)
 
     def test_post_valido_crea_venta(self):
-        """POST válido crea Venta + DetalleVenta y redirige al detalle."""
         self.client.force_login(self.user)
         r = self.client.post(reverse('ventas:crear'), {
             'cliente':         self.cli.pk,

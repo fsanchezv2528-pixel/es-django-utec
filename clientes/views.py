@@ -1,7 +1,7 @@
 # clientes/views.py
-"""Vistas de la app clientes — W07 (lectura) + W08 (escritura)."""
+"""Vistas de la app clientes — W07 (lectura) + W08 (escritura) + W09 (permisos)."""
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -75,13 +75,15 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class ClienteDeleteView(LoginRequiredMixin, DeleteView):
-    """Confirmación y borrado de cliente."""
+# ── Borrado con permiso (W09) ────────────────────────────────────────
+class ClienteDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """Borrado de cliente. Sin sesión → login; sin permiso → 403."""
 
-    model         = Cliente
-    template_name = 'clientes/eliminar.html'
-    pk_url_kwarg  = 'cliente_id'
-    success_url   = reverse_lazy('clientes:lista')
+    model               = Cliente
+    template_name       = 'clientes/eliminar.html'
+    pk_url_kwarg        = 'cliente_id'
+    success_url         = reverse_lazy('clientes:lista')
+    permission_required = 'clientes.delete_cliente'
 
     def form_valid(self, form):
         nombre = self.object.nombre
