@@ -6,7 +6,7 @@
 | **Número de espiral** | 3 |
 | **Nombre del ciclo** | CRUD Web y Autenticación |
 | **Semanas** | W07 – W09 |
-| **Fecha de inicio** | ___/___/_____ |
+| **Fecha de inicio** | __10_/__8_/__26___ |
 | **Fecha de cierre** | 20/10/2026 |
 | **Responsable** | Felipe Sánchez Vázquez |
 | **Asesor** | MC. Román Fernando López González |
