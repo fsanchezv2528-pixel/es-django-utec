@@ -1,39 +1,27 @@
 # productos/serializers.py
-"""Serializers de la app productos — W10.
-
-Expone Categoria y Producto como recursos JSON para la API REST.
-"""
+"""Serializers de la app productos — W10 + W11 (imagen_url)."""
 from rest_framework import serializers
 
 from .models import Categoria, Producto
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
-    """Serializer de Categoria — campos completos."""
+    """Serializer de Categoria — todos los campos del modelo."""
 
     class Meta:
         model            = Categoria
-        fields           = ['id', 'nombre', 'descripcion']
+        fields           = '__all__'
         read_only_fields = ['id']
 
 
 class ProductoSerializer(serializers.ModelSerializer):
-    """Serializer de Producto con nombre de categoría y proveedor.
+    """Serializer de Producto con nombres legibles y URL absoluta de imagen."""
 
-    Campos adicionales:
-        categoria_nombre: nombre legible de la FK categoria.
-        proveedor_nombre: nombre legible de la FK proveedor (nullable).
-    """
-
-    categoria_nombre = serializers.CharField(
-        source='categoria.nombre',
-        read_only=True
-    )
+    categoria_nombre = serializers.CharField(source='categoria.nombre', read_only=True)
     proveedor_nombre = serializers.CharField(
-        source='proveedor.nombre',
-        read_only=True,
-        allow_null=True
+        source='proveedor.nombre', read_only=True, allow_null=True, default=None
     )
+    imagen_url = serializers.SerializerMethodField()
 
     class Meta:
         model  = Producto
@@ -41,6 +29,18 @@ class ProductoSerializer(serializers.ModelSerializer):
             'id', 'nombre', 'precio', 'stock',
             'categoria', 'categoria_nombre',
             'proveedor', 'proveedor_nombre',
-            'activo', 'creado',
+            'activo', 'imagen', 'imagen_url', 'creado',
         ]
-        read_only_fields = ['id', 'creado', 'categoria_nombre', 'proveedor_nombre']
+        read_only_fields = ['id', 'creado']
+        extra_kwargs = {
+            'imagen': {'required': False, 'allow_null': True},
+        }
+
+    def get_imagen_url(self, obj: Producto) -> str | None:
+        """URL absoluta de la imagen, o None si el producto no tiene."""
+        if not obj.imagen:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.imagen.url)
+        return obj.imagen.url

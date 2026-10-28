@@ -13,6 +13,8 @@ from django.db import models
 
 from proveedores.models import Proveedor
 
+from .validators import validar_imagen_producto
+
 
 class Categoria(models.Model):
     """Categoría para clasificar productos del catálogo.
@@ -77,6 +79,14 @@ class Producto(models.Model):
     )
     activo    = models.BooleanField(
         default=True, verbose_name='Activo'
+    )
+    imagen = models.ImageField(          # W11
+        upload_to='productos/',
+        null=True,
+        blank=True,
+        verbose_name='Imagen del producto',
+        help_text='Formatos: JPEG, PNG, WEBP. Máximo 5 MB.',
+        validators=[validar_imagen_producto],
     )
     creado    = models.DateTimeField(
         auto_now_add=True, verbose_name='Fecha de registro'
