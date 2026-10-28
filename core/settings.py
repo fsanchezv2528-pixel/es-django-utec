@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     # Terceros
     'rest_framework',
+    'rest_framework.authtoken',
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -99,9 +100,15 @@ LOGOUT_REDIRECT_URL = '/'
 
 # ── DRF ──────────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',   # para el navegador
+        'rest_framework.authentication.TokenAuthentication',     # para clientes externos
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -184,7 +191,7 @@ JAZZMIN_UI_TWEAKS = {
     'layout_boxed':             False,
     'footer_fixed':             False,
     'sidebar_fixed':            True,
-    'sidebar':                  'sidebar-dark-navy',
+    'sidebar':                  'sidebar-dark-warning',   # menú gris + opción activa dorada
     'sidebar_nav_small_text':   False,
     'sidebar_disable_expand':   False,
     'sidebar_nav_child_indent': True,
@@ -221,4 +228,3 @@ ACCOUNT_EMAIL_REQUIRED      = False
 ACCOUNT_EMAIL_VERIFICATION  = 'none'
 ACCOUNT_LOGOUT_ON_GET       = True
 ACCOUNT_SESSION_REMEMBER    = True
-
