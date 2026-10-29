@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Factura {{ venta.pk|stringformat:"05d" }}</title>
+<style>
+    @page {
+        size: a4 portrait;
+        margin: 2cm 2cm 2.6cm 2cm;
+        @frame pie {
+            -pdf-frame-content: pie-pagina;
+            left: 2cm; width: 17cm; top: 27.6cm; height: 1cm;
+        }
+    }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #1A1A2E; }
+
+    .header { background-color: #0A2342; color: #FFFFFF; border-bottom: 4px solid #B8860B; }
+    .header td { padding: 12px 16px; vertical-align: middle; }
+    .titulo { font-size: 22pt; font-weight: bold; color: #B8860B; }
+    .empresa { font-size: 10pt; color: #D7DEE8; }
+    .folio { font-size: 15pt; font-weight: bold; color: #B8860B; text-align: right; }
+    .fecha { font-size: 9pt; color: #D7DEE8; text-align: right; }
+
+    .datos { width: 100%; margin-top: 16px; border-collapse: collapse; }
+    .datos td { padding: 5px 8px; font-size: 9.5pt; border: 1px solid #E8F0FB; }
+    .lbl { background-color: #E8F0FB; font-weight: bold; color: #0A2342; width: 22%; }
+
+    .productos { width: 100%; margin-top: 18px; border-collapse: collapse; }
+    .productos th { background-color: #0A2342; color: #FFFFFF; padding: 7px 9px;
+                    font-size: 9pt; text-align: left; border-bottom: 3px solid #B8860B; }
+    .productos td { padding: 6px 9px; font-size: 9.5pt; border-bottom: 1px solid #E8F0FB; }
+    .num { text-align: right; }
+    thead { display: table-header-group; }
+
+    .totales { width: 45%; margin-top: 14px; margin-left: 55%; border-collapse: collapse; }
+    .totales td { padding: 6px 9px; font-size: 9.5pt; border: 1px solid #E8F0FB; }
+    .totales .final td { background-color: #FDF8E8; border-top: 2px solid #B8860B;
+                         font-weight: bold; font-size: 11.5pt; }
+    .oro { color: #B8860B; }
+
+    .nota { margin-top: 24px; padding: 10px 14px; border-left: 4px solid #4A90D9;
+            background-color: #F5F9FF; font-size: 8.5pt; color: #5A6A7E; }
+    #pie-pagina { font-size: 8.5pt; color: #5A6A7E; text-align: right; }
+</style>
+</head>
+<body>
+
+<div id="pie-pagina">
+    {{ empresa }} · Factura #{{ venta.pk|stringformat:"05d" }} ·
+    Página <pdf:pagenumber> de <pdf:pagecount>
+</div>
+
+<table class="header" width="100%">
+    <tr>
+        <td width="60%">
+            {% if config.logo %}<img src="{{ config.logo.url }}" height="48"><br>{% endif %}
+            <div class="titulo">FACTURA</div>
+            <div class="empresa">{{ empresa }}</div>
+            {% if config.rfc %}<div class="empresa">RFC: {{ config.rfc }}</div>{% endif %}
+        </td>
+        <td width="40%">
+            <div class="folio"># {{ venta.pk|stringformat:"05d" }}</div>
+            <div class="fecha">{{ venta.fecha|date:"d/m/Y H:i" }} h</div>
+        </td>
+    </tr>
+</table>
+
+<table class="datos">
+    <tr>
+        <td class="lbl">Cliente</td><td>{{ venta.cliente.nombre }}</td>
+        <td class="lbl">Correo</td><td>{{ venta.cliente.correo|default:"—" }}</td>
+    </tr>
+    <tr>
+        <td class="lbl">Teléfono</td><td>{{ venta.cliente.telefono|default:"—" }}</td>
+        <td class="lbl">Moneda</td><td>{{ config.moneda|default:"MXN" }}</td>
+    </tr>
+</table>
+
+<table class="productos">
+    <thead>
+        <tr>
+            <th width="6%">#</th>
+            <th width="46%">Producto</th>
+            <th width="18%" class="num">Precio unit.</th>
+            <th width="12%" class="num">Cant.</th>
+            <th width="18%" class="num">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in detalles %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ d.producto.nombre }}</td>
+            <td class="num">${{ d.precio_unitario }}</td>
+            <td class="num">{{ d.cantidad }}</td>
+            <td class="num">${{ d.subtotal }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;color:#5A6A7E;">Sin líneas de detalle.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="totales" align="right">
+    <tr><td class="lbl">Subtotal</td><td class="num">${{ subtotal }}</td></tr>
+    <tr><td class="lbl">IVA ({{ iva_pct }}%)</td><td class="num">${{ iva }}</td></tr>
+    <tr class="final"><td>TOTAL</td><td class="num oro">${{ total }}</td></tr>
+</table>
+
+<div class="nota">
+    <strong>Nota:</strong> Documento generado por el sistema ERP Django de {{ empresa }}.
+    {% if config.rfc %}RFC: {{ config.rfc }}.{% endif %}
+    Generado el {{ hoy|date:"d/m/Y" }}.
+</div>
+
+</body>
+</html>

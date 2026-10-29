@@ -46,3 +46,21 @@ y generación de PDFs de facturas.
 | 8 tests de media pasando | ✅ W11 |
 | Generación PDF WeasyPrint | ⏳ W12 |
 | Exportación Excel openpyxl | ⏳ W12 |
+
+## Sprint Backlog — actualización W12 (cierre · Hito M4)
+
+| Tarea | Estado |
+|---|---|
+| API REST + Token Auth | ✅ W10 |
+| ImageField + validador + imagen_url | ✅ W11 |
+| PDF de factura /ventas/<id>/pdf/ | ✅ W12 |
+| Exportación Excel /productos/exportar-excel/ | ✅ W12 |
+| 8 tests de documentos (131 acumulados) | ✅ W12 |
+| WeasyPrint vía Docker | ⏳ pendiente: el equipo no tiene Docker/WSL2; se usa xhtml2pdf (respaldo documentado en la guía) |
+
+## Hito M4 — ALCANZADO ✅
+- DRF completo con token
+- Imágenes de productos validadas
+- PDF de factura descargable
+- Exportación de inventario a Excel
+- Tests: Ran 131 tests → OK

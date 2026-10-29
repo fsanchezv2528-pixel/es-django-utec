@@ -13,6 +13,9 @@
             + Nuevo producto
         </a>{% endif %}
     {% endif %}
+    {% if user.is_authenticated %}
+        <a href="{% url 'productos:exportar_excel' %}" class="btn-erp-primary">📊 Exportar Excel</a>
+    {% endif %}
 </div>
 
 {% if productos %}

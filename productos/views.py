@@ -108,3 +108,57 @@ class ProductoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
             return redirect('productos:detalle', producto_id=self.object.pk)
         messages.success(self.request, f'Producto "{nombre}" eliminado.')
         return response
+
+
+# ── Exportación de inventario a Excel (W12) ───────────────────────────
+from django.contrib.auth.decorators import login_required as _login_required
+
+
+@_login_required
+def exportar_excel(request):
+    """Descarga el inventario de productos en un archivo .xlsx."""
+    from django.http import HttpResponse
+    from django.utils import timezone
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Inventario'
+
+    encabezados = ['ID', 'Nombre', 'Categoría', 'Proveedor',
+                   'Precio', 'Stock', 'Valor en inventario', 'Activo']
+    ws.append(encabezados)
+    for celda in ws[1]:
+        celda.font      = Font(bold=True, color='FFFFFF')
+        celda.fill      = PatternFill('solid', fgColor='0A2342')
+        celda.alignment = Alignment(horizontal='center')
+
+    productos = Producto.objects.select_related('categoria', 'proveedor').order_by('nombre')
+    for p in productos:
+        ws.append([
+            p.pk,
+            p.nombre,
+            str(p.categoria),
+            str(p.proveedor) if p.proveedor else '',
+            float(p.precio),
+            p.stock,
+            float(p.precio * p.stock),
+            'Sí' if p.activo else 'No',
+        ])
+
+    for fila in ws.iter_rows(min_row=2, min_col=5, max_col=7):
+        fila[0].number_format = '"$"#,##0.00'
+        fila[2].number_format = '"$"#,##0.00'
+
+    for col, ancho in zip('ABCDEFGH', [8, 32, 20, 22, 14, 10, 20, 10]):
+        ws.column_dimensions[col].width = ancho
+    ws.freeze_panes = 'A2'
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    nombre = f'inventario_{timezone.localdate():%Y%m%d}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{nombre}"'
+    wb.save(response)
+    return response

@@ -85,3 +85,65 @@ class VentaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         response = super().form_valid(form)
         messages.success(self.request, f'Venta #{pk} eliminada.')
         return response
+
+
+# ── PDF de factura (W12) ──────────────────────────────────────────────
+from decimal import Decimal as _Decimal
+
+from django.contrib.auth.decorators import login_required as _login_required
+
+
+def _config_erp():
+    """Devuelve la configuración del ERP, o None si no hay."""
+    try:
+        from configuracion.models import ConfiguracionERP
+    except Exception:
+        return None
+    if hasattr(ConfiguracionERP, 'get_instance'):
+        try:
+            return ConfiguracionERP.get_instance()
+        except Exception:
+            pass
+    return ConfiguracionERP.objects.first()
+
+
+@_login_required
+def venta_pdf(request, venta_id):
+    """Descarga la factura de una venta en PDF (WeasyPrint o xhtml2pdf)."""
+    from datetime import date
+
+    from django.http import HttpResponse
+    from django.shortcuts import get_object_or_404
+    from django.template.loader import render_to_string
+
+    from .pdf import html_a_pdf
+
+    venta = get_object_or_404(
+        Venta.objects.select_related('cliente').prefetch_related('detalles__producto'),
+        pk=venta_id,
+    )
+    config  = _config_erp()
+    valor   = getattr(config, 'iva_porcentaje', None)
+    iva_pct = _Decimal(str(valor)) if valor is not None else _Decimal('16')
+
+    subtotal = _Decimal(str(venta.total))
+    iva      = (subtotal * iva_pct / 100).quantize(_Decimal('0.01'))
+
+    html = render_to_string('ventas/factura_pdf.html', {
+        'venta':    venta,
+        'detalles': venta.detalles.all(),
+        'config':   config,
+        'empresa':  getattr(config, 'nombre_empresa', None) or 'ERP Django · UTEC Celaya',
+        'subtotal': subtotal.quantize(_Decimal('0.01')),
+        'iva_pct':  iva_pct.normalize(),
+        'iva':      iva,
+        'total':    (subtotal + iva).quantize(_Decimal('0.01')),
+        'hoy':      date.today(),
+    }, request=request)
+
+    pdf, motor = html_a_pdf(html, base_url=request.build_absolute_uri('/'))
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="factura_{venta.pk:05d}.pdf"'
+    response['X-PDF-Engine'] = motor
+    return response
