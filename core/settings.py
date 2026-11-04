@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     # Terceros
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'whitenoise.runserver_nostatic',
     # Apps del ERP
     'clientes',
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'ventas',
     'reportes',
     'configuracion',
+    'catalogo',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'catalogo.context_processors.carrito_info',   # W13
             ],
         },
     },

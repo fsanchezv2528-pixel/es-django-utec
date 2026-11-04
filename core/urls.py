@@ -24,6 +24,7 @@ api_urlpatterns = productos_api + clientes_api + proveedores_api + ventas_api
 urlpatterns = [
     path('admin/',       admin.site.urls),
     path('accounts/',    include('allauth.urls')),   # W09 allauth
+    path('catalogo/',   include('catalogo.urls', namespace='catalogo')),   # W13
     path('',             views.bienvenida,            name='inicio'),
     # API REST (W10)
     path('api/',            include((api_urlpatterns, 'api'))),

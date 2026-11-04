@@ -1,0 +1,163 @@
+# catalogo/views.py
+"""Catálogo público y carrito de compras en sesión — W13.
+
+Estructura del carrito en la sesión (todo serializable a JSON):
+    request.session['carrito'] = {
+        '1': {'nombre': 'Laptop', 'precio': '10000.00', 'cantidad': 2,
+              'imagen': 'productos/laptop.jpg'},
+    }
+    - La clave es str(producto.pk): JSON solo admite claves de texto.
+    - El precio se guarda como str: Decimal no es serializable a JSON.
+"""
+from decimal import Decimal
+
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.generic import ListView
+
+from productos.models import Producto
+
+from .filters import ProductoFilter
+
+MAX_CANTIDAD = 99
+
+
+# ── CATÁLOGO ──────────────────────────────────────────────────────────
+class CatalogoView(ListView):
+    """Catálogo público con filtros. No requiere iniciar sesión."""
+
+    model               = Producto
+    template_name       = 'catalogo/catalogo.html'
+    context_object_name = 'productos'
+    paginate_by         = 12
+
+    def get_queryset(self):
+        qs = (
+            Producto.objects
+            .select_related('categoria', 'proveedor')
+            .filter(activo=True)
+            .order_by('nombre')
+        )
+        self.filtro = ProductoFilter(self.request.GET, queryset=qs)
+        return self.filtro.qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['filtro'] = self.filtro
+        # Parámetros de filtro sin "page", para armar los enlaces de paginación
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        ctx['filtros_query'] = params.urlencode()
+        return ctx
+
+
+# ── CARRITO: utilidades ───────────────────────────────────────────────
+def _obtener_carrito(request) -> dict:
+    return request.session.get('carrito', {})
+
+
+def _guardar_carrito(request, carrito: dict) -> None:
+    request.session['carrito'] = carrito
+    request.session.modified   = True
+
+
+def _leer_cantidad(request, defecto: int = 1) -> int:
+    """Lee 'cantidad' del POST sin tronar si viene vacía o con texto."""
+    try:
+        return int(request.POST.get('cantidad', defecto))
+    except (TypeError, ValueError):
+        return defecto
+
+
+def _redirigir_seguro(request, defecto: str):
+    """Regresa a 'next' solo si apunta a este mismo sitio (evita open redirect)."""
+    destino = request.POST.get('next') or request.META.get('HTTP_REFERER')
+    if destino and url_has_allowed_host_and_scheme(
+        destino, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(destino)
+    return redirect(defecto)
+
+
+# ── CARRITO: vistas ───────────────────────────────────────────────────
+def ver_carrito(request):
+    """Muestra el carrito con subtotales y total (precios como Decimal)."""
+    items = []
+    total = Decimal('0.00')
+    for prod_id, datos in _obtener_carrito(request).items():
+        precio   = Decimal(datos['precio'])
+        cantidad = int(datos['cantidad'])
+        subtotal = precio * cantidad
+        total   += subtotal
+        items.append({
+            'prod_id':  prod_id,
+            'nombre':   datos['nombre'],
+            'precio':   precio,
+            'cantidad': cantidad,
+            'subtotal': subtotal,
+            'imagen':   datos.get('imagen'),
+        })
+    return render(request, 'catalogo/carrito.html', {'items': items, 'total': total})
+
+
+def agregar_al_carrito(request, producto_id: int):
+    """Agrega un producto o suma su cantidad. Solo POST (protegido con CSRF)."""
+    if request.method != 'POST':
+        return redirect('catalogo:catalogo')
+
+    producto = get_object_or_404(Producto, pk=producto_id, activo=True)
+    carrito  = _obtener_carrito(request)
+    clave    = str(producto_id)
+    cantidad = max(1, _leer_cantidad(request))
+
+    if clave in carrito:
+        carrito[clave]['cantidad'] = min(MAX_CANTIDAD, carrito[clave]['cantidad'] + cantidad)
+    else:
+        carrito[clave] = {
+            'nombre':   producto.nombre,
+            'precio':   str(producto.precio),
+            'cantidad': min(MAX_CANTIDAD, cantidad),
+            'imagen':   producto.imagen.name if getattr(producto, 'imagen', None) else None,
+        }
+
+    _guardar_carrito(request, carrito)
+    messages.success(request, f'"{producto.nombre}" agregado al carrito.')
+    return _redirigir_seguro(request, 'catalogo:catalogo')
+
+
+def remover_del_carrito(request, producto_id: int):
+    """Elimina un producto del carrito. Solo POST."""
+    if request.method != 'POST':
+        return redirect('catalogo:carrito')
+    carrito = _obtener_carrito(request)
+    clave   = str(producto_id)
+    nombre  = carrito.get(clave, {}).get('nombre', 'Producto')
+    carrito.pop(clave, None)
+    _guardar_carrito(request, carrito)
+    messages.warning(request, f'"{nombre}" eliminado del carrito.')
+    return redirect('catalogo:carrito')
+
+
+def actualizar_cantidad(request, producto_id: int):
+    """Cambia la cantidad. Si es 0 o menos, quita el producto. Solo POST."""
+    if request.method != 'POST':
+        return redirect('catalogo:carrito')
+    carrito  = _obtener_carrito(request)
+    clave    = str(producto_id)
+    cantidad = _leer_cantidad(request)
+    if clave in carrito:
+        if cantidad > 0:
+            carrito[clave]['cantidad'] = min(MAX_CANTIDAD, cantidad)
+        else:
+            carrito.pop(clave)
+    _guardar_carrito(request, carrito)
+    return redirect('catalogo:carrito')
+
+
+def vaciar_carrito(request):
+    """Vacía el carrito. Solo POST."""
+    if request.method == 'POST':
+        _guardar_carrito(request, {})
+        messages.info(request, 'Carrito vaciado.')
+    return redirect('catalogo:carrito')
