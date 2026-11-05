@@ -25,3 +25,8 @@ media/
 Thumbs.db
 .DS_Store
 media/
+
+# Respaldos y archivos sueltos
+*.bak
+Untitled-*.py
+Python
