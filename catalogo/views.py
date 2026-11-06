@@ -177,6 +177,8 @@ def vaciar_carrito(request):
         messages.info(request, 'Carrito vaciado.')
     return redirect('catalogo:carrito')
 
+
+# ── CHECKOUT (W14) ────────────────────────────────────────────────────
 @login_required
 def checkout(request):
     """Resumen del carrito y creación de PaymentIntent de Stripe."""
@@ -229,6 +231,8 @@ def checkout(request):
             return redirect('catalogo:pago_error')
 
         except Exception as exc:
+            import traceback
+            traceback.print_exc()   # TEMPORAL: quitar al terminar
             messages.error(
                 request,
                 f'Error inesperado en el proceso de pago: {exc}'
@@ -260,5 +264,5 @@ def pago_exitoso(request, pedido_id: int):
 
 
 def pago_error(request):
-    """Vista de error de pago."""
+    """Vista de error de pago — muestra mensaje y permite reintentar."""
     return render(request, 'catalogo/pago_error.html')
