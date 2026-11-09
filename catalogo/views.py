@@ -178,10 +178,15 @@ def vaciar_carrito(request):
     return redirect('catalogo:carrito')
 
 
-# ── CHECKOUT (W14) ────────────────────────────────────────────────────
+# ── CHECKOUT (W14 + W15) ──────────────────────────────────────────────
 @login_required
 def checkout(request):
-    """Resumen del carrito y creación de PaymentIntent de Stripe."""
+    """Resumen del carrito y creación de PaymentIntent de Stripe.
+
+    W15: el Pedido guarda un snapshot del carrito (items_snapshot) para
+    que el webhook pueda descontar el stock aunque el carrito de la
+    sesión ya se haya vaciado.
+    """
     carrito = _obtener_carrito(request)
     if not carrito:
         messages.warning(request, 'Tu carrito está vacío.')
@@ -195,11 +200,24 @@ def checkout(request):
             cliente = obtener_o_crear_cliente(request.user)
 
             numero = generar_numero_pedido()
+
+            # Snapshot del carrito: lista de dicts serializables a JSON
+            snapshot = [
+                {
+                    'producto_id': int(prod_id),
+                    'nombre':      datos['nombre'],
+                    'cantidad':    int(datos['cantidad']),
+                    'precio':      datos['precio'],   # ya es str
+                }
+                for prod_id, datos in carrito.items()
+            ]
+
             pedido = Pedido.objects.create(
-                numero_pedido = numero,
-                cliente       = cliente,
-                estado        = 'pendiente',
-                total_pagado  = totales['total'],
+                numero_pedido  = numero,
+                cliente        = cliente,
+                estado         = 'pendiente',
+                total_pagado   = totales['total'],
+                items_snapshot = snapshot,
             )
 
             monto_centavos = int(totales['total'] * 100)
@@ -231,8 +249,6 @@ def checkout(request):
             return redirect('catalogo:pago_error')
 
         except Exception as exc:
-            import traceback
-            traceback.print_exc()   # TEMPORAL: quitar al terminar
             messages.error(
                 request,
                 f'Error inesperado en el proceso de pago: {exc}'
