@@ -15,6 +15,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 
 from ventas.models import Pedido
+from ventas.tasks import enviar_confirmacion_pedido
 from .checkout_utils import (
     calcular_totales,
     generar_numero_pedido,
@@ -264,10 +265,18 @@ def checkout(request):
 
 
 def pago_exitoso(request, pedido_id: int):
-    """Confirmación post-pago: vacía el carrito y muestra el pedido."""
+    """Confirmación post-pago: vacía el carrito y muestra el pedido.
+
+    W16: encola la tarea de confirmación con .delay(); la respuesta
+    HTTP no espera a que el worker la procese.
+    """
     pedido = get_object_or_404(Pedido, pk=pedido_id)
 
     _guardar_carrito(request, {})
+
+    # W16: encolar la tarea en Redis (no bloquea la respuesta HTTP)
+    enviar_confirmacion_pedido.delay(pedido.pk)
+
     messages.success(
         request,
         f'¡Pago exitoso! Tu pedido {pedido.numero_pedido} '

@@ -10,6 +10,7 @@ Verificación de seguridad:
 Eventos manejados:
     payment_intent.succeeded     → Pedido.estado = 'pagado'
                                     Descontar stock de productos
+                                    Encolar tarea de confirmación (W16)
     payment_intent.payment_failed → Pedido.estado = 'cancelado'
 
 Compatibilidad:
@@ -27,6 +28,7 @@ from django.views.decorators.http import require_POST
 
 from productos.models import Producto
 from ventas.models    import Pedido
+from ventas.tasks     import enviar_confirmacion_pedido
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +114,8 @@ def stripe_webhook(request) -> HttpResponse:
 def _manejar_pago_exitoso(payment_intent) -> None:
     """Procesa un pago confirmado por Stripe.
 
-    Actualiza el Pedido a 'pagado' y descuenta el stock de productos.
+    Actualiza el Pedido a 'pagado', descuenta el stock de productos
+    y encola la tarea de confirmación (W16).
 
     Args:
         payment_intent: objeto PaymentIntent del evento de Stripe.
@@ -137,6 +140,9 @@ def _manejar_pago_exitoso(payment_intent) -> None:
 
         # Descontar stock de cada producto del snapshot
         _descontar_stock(pedido)
+
+        # W16: encolar la tarea de confirmación
+        enviar_confirmacion_pedido.delay(pedido.pk)
     else:
         logger.info(
             f'Pedido {pedido.numero_pedido} ya estaba pagado — '
