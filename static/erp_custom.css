@@ -225,3 +225,6 @@ html[data-event="astro"] .erp-module-card {
 }
 .astro-toggle:hover { transform: scale(1.08); box-shadow: 0 0 22px rgba(255, 210, 122, .6); }
 .astro-toggle:focus-visible { outline: 3px solid #FFD27A; outline-offset: 3px; }
+html[data-event="astro"][data-theme="dark"] [style*="var(--clr-navy)"] {
+    color: #E8ECFF !important;
+}

@@ -256,3 +256,27 @@ CELERY_TASK_DEFAULT_QUEUE = 'erp_django'
 
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
+
+# ── CORREO ELECTRÓNICO (W17) ──────────────────────────────────────────────
+# Desarrollo: backend de consola (imprime el correo en la terminal)
+# Producción: anymail + SendGrid (se define en settings_prod.py)
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'
+)
+
+DEFAULT_FROM_EMAIL = env(
+    'DEFAULT_FROM_EMAIL',
+    default='ERP Django <noreply@erp-django.com>'
+)
+
+EMAIL_SUBJECT_PREFIX = '[ERP Django] '
+
+ADMINS = [
+    ('Admin ERP', env('ADMIN_EMAIL', default='admin@erp-django.com')),
+]
+
+SENDGRID_API_KEY = env('SENDGRID_API_KEY', default='')
+ANYMAIL = {
+    'SENDGRID_API_KEY': SENDGRID_API_KEY,
+}

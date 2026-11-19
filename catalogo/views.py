@@ -9,7 +9,7 @@ Estructura del carrito en la sesión (todo serializable a JSON):
     - La clave es str(producto.pk): JSON solo admite claves de texto.
     - El precio se guarda como str: Decimal no es serializable a JSON.
 """
-
+import uuid
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -231,7 +231,7 @@ def checkout(request):
                     'pedido_num': pedido.numero_pedido,
                     'cliente':    cliente.nombre,
                 },
-                idempotency_key = f'pedido-{pedido.pk}',
+                idempotency_key = f'pedido-{pedido.pk}-{uuid.uuid4().hex[:12]}',
             )
 
             return render(request, 'catalogo/checkout.html', {

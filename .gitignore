@@ -30,3 +30,4 @@ media/
 *.bak
 Untitled-*.py
 Python
+staticfiles/
